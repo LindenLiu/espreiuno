@@ -1,0 +1,8 @@
+#!/bin/bash
+
+board=$(jq -r ".board" .vscode/arduino.json)
+sketch=$(jq -r ".sketch" .vscode/arduino.json)
+output=$(jq -r ".output" .vscode/arduino.json)
+echo $board
+cmd=$(printf "arduino-cli compile -b %s --output-dir %s %s" "$board" "$output" "$sketch")
+$cmd

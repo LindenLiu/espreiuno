@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ACS712.h>
-#include "../SwitchSensor.h"
+#include "SwitchSensor.h"
 
 class ACS712SwitchSensor : public SwitchSensor
 {

@@ -2,3 +2,5 @@
 .vscode
 # Arduino build folder
 build
+# PlatformIO
+.pio

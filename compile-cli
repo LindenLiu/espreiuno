@@ -1,8 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 board=$(jq -r ".board" .vscode/arduino.json)
 sketch=$(jq -r ".sketch" .vscode/arduino.json)
 output=$(jq -r ".output" .vscode/arduino.json)
 echo $board
-cmd=$(printf "arduino-cli compile -b %s --output-dir %s %s" "$board" "$output" "$sketch")
+cmd=$(printf "arduino-cli compile -b %s --output-dir %s %s --libraries %s" "$board" "$output" "$sketch" "$script_dir")
 $cmd

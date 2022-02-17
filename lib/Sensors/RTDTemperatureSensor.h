@@ -2,7 +2,7 @@
 
 #define TEMP_SENSOR_READ_INTERVAL 30 // Minimum time between tow reads. Unit milliseconds
 #include <Adafruit_MAX31865.h>
-#include "../TemperatureSensor.h"
+#include "TemperatureSensor.h"
 
 typedef enum PTSensorType {
   PT_100 = 100,
@@ -18,7 +18,7 @@ private:
   max31865_numwires_t wireNum;
 
 public:
-  RTDTemperatureSensor(u8 csPin, PTSensorType ptType, float refResistor, max31865_numwires_t wireNum);
+  RTDTemperatureSensor(uint8_t csPin, PTSensorType ptType, float refResistor, max31865_numwires_t wireNum);
   ~RTDTemperatureSensor();
   void begin() override;
   float readCelsius() override;
@@ -26,7 +26,7 @@ public:
   uint8_t sensorFaultCode() override;
 };
 
-RTDTemperatureSensor::RTDTemperatureSensor(u8 csPin, PTSensorType ptType, float refResistor, max31865_numwires_t wireNum): 
+RTDTemperatureSensor::RTDTemperatureSensor(uint8_t csPin, PTSensorType ptType, float refResistor, max31865_numwires_t wireNum): 
   ptType(ptType), refResistor(refResistor), wireNum(wireNum)
 {
   sensor = new Adafruit_MAX31865(csPin);

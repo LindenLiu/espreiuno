@@ -1,14 +1,14 @@
 #pragma once
 
 #include <RBDdimmer.h>
-#include "../Dimmer.h"
+#include "Dimmer.h"
 
 class RBDDimmerActor : public Dimmer
 {
 private:
   dimmerLamp *dimmer;
 public:
-  RBDDimmerActor(uint8_t pin);
+  RBDDimmerActor(uint8_t pin, uint8_t zc_pin);
   ~RBDDimmerActor();
   void begin() override;
   void setPower(int power) override;
@@ -17,9 +17,13 @@ public:
   bool isOn() override; 
 };
 
-RBDDimmerActor::RBDDimmerActor(uint8_t pin)
+RBDDimmerActor::RBDDimmerActor(uint8_t pin, uint8_t zc_pin)
 {
-  dimmer = new dimmerLamp(pin);
+  #if   defined(ARDUINO_ARCH_AVR)
+	  dimmer = new dimmerLamp(pin);
+  #elif defined(ARDUINO_ARCH_ESP32)
+    dimmer = new dimmerLamp(pin, zc_pin);
+  #endif
 }
 
 RBDDimmerActor::~RBDDimmerActor()

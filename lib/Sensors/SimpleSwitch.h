@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../SwitchSensor.h"
+#include "Platform.h"
+#include "SwitchSensor.h"
 
 class SimpleSwitch : public SwitchSensor
 {
@@ -23,10 +24,10 @@ SimpleSwitch::~SimpleSwitch()
 
 void SimpleSwitch::begin() 
 {
-  pinMode(pin, INPUT);
+  platform->setPinMode(pin, INPUT);
 }
 
 bool SimpleSwitch::isOn() 
 {
-  return analogRead(this->pin) == 0;
+  return platform->analogRead(this->pin) == 0;
 }

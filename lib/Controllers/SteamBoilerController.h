@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../BoilerController.h"
+#include "BoilerController.h"
 
 class SteamBoilerController : public BoilerController<double>
 {

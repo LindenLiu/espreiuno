@@ -1,8 +1,6 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include <Wire.h>
-#include "../lib/TemperatureSensor.h"
-#include "../lib/SwitchSensor.h"
+#include "PlatformConfig.h"
+#include "TemperatureSensor.h"
+#include "SwitchSensor.h"
 #include "../lib/Sensors/SimpleSwitch.h"
 #include "../lib/Sensors/ACS712SwitchSensor.h"
 #include "../lib/Actors/RBDDimmerActor.h"

@@ -22,59 +22,26 @@
  * SOFTWARE.
  */
 #pragma once
+#include <Storage.h>
+#include <EEPROM.h>
 
-#include <RBDdimmer.h>
-#include "Dimmer.h"
-
-class RBDDimmerActor : public Dimmer
+class EEPROMStorage
 {
 private:
-  dimmerLamp *dimmer;
+  /* data */
 public:
-  RBDDimmerActor(uint8_t pin, uint8_t zc_pin);
-  ~RBDDimmerActor();
-  void begin() override;
-  void setPower(int power) override;
-  int getPower() override;
-  void setOn(bool isOn) override;
-  bool isOn() override; 
+  EEPROMStorage(/* args */);
+  ~EEPROMStorage();
+  template<typename Data>
+  void write(int addr, const Data &obj) {
+    EEPROM.put(addr, obj);
+  }
 };
 
-RBDDimmerActor::RBDDimmerActor(uint8_t pin, uint8_t zc_pin)
+EEPROMStorage::EEPROMStorage(/* args */)
 {
-  #if   defined(ARDUINO_ARCH_AVR)
-	  dimmer = new dimmerLamp(pin);
-  #elif defined(ARDUINO_ARCH_ESP32)
-    dimmer = new dimmerLamp(pin, zc_pin);
-  #endif
 }
 
-RBDDimmerActor::~RBDDimmerActor()
+EEPROMStorage::~EEPROMStorage()
 {
-  delete dimmer;
-}
-
-void RBDDimmerActor::begin() 
-{
-  dimmer->begin(NORMAL_MODE, OFF);
-}
-
-void RBDDimmerActor::setPower(int power) 
-{
-  dimmer->setPower(power);
-}
-
-int RBDDimmerActor::getPower() 
-{
-  return dimmer->getPower();
-}
-
-void RBDDimmerActor::setOn(bool isOn) 
-{
-  dimmer->setState(isOn ? ON : OFF);
-}
-
-bool RBDDimmerActor::isOn() 
-{
-  return dimmer->getState() == ON;
 }

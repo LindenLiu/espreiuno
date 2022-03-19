@@ -22,59 +22,40 @@
  * SOFTWARE.
  */
 #pragma once
+#include <ArduinoInterface.h>
+#include <PressureTransducer.h>
 
-#include <RBDdimmer.h>
-#include "Dimmer.h"
-
-class RBDDimmerActor : public Dimmer
+class XDBPressureTransducer : public PressureTransducer
 {
 private:
-  dimmerLamp *dimmer;
+  /* data */
+  // The bar range is 0 to 12 bar, the voltage range is 0.5 to 4.5, the adc is 10 bit [0, 1024). 
+  // So the bar per voltage is (barMax - barMin) / Vmax - Vmin. Reading per V is 1024 / 5.
+  // So the bar per adc reading 1 is (barMax - barMin) / (Vmax - Vmin) / (1024 / 5)
+  const float aToBar = 15.0/1024.0;
+  const float barStart = 0.5 * 3 ; // The output voltage is 0.5 to 4.5v, bar per v is 3.
+
+  unsigned char pressurePin;  
 public:
-  RBDDimmerActor(uint8_t pin, uint8_t zc_pin);
-  ~RBDDimmerActor();
-  void begin() override;
-  void setPower(int power) override;
-  int getPower() override;
-  void setOn(bool isOn) override;
-  bool isOn() override; 
+  XDBPressureTransducer(unsigned char pressurePin);
+  ~XDBPressureTransducer();
+  void begin();
+  float getPressure() override;
 };
 
-RBDDimmerActor::RBDDimmerActor(uint8_t pin, uint8_t zc_pin)
+XDBPressureTransducer::XDBPressureTransducer(unsigned char pressurePin): pressurePin(pressurePin)
 {
-  #if   defined(ARDUINO_ARCH_AVR)
-	  dimmer = new dimmerLamp(pin);
-  #elif defined(ARDUINO_ARCH_ESP32)
-    dimmer = new dimmerLamp(pin, zc_pin);
-  #endif
 }
 
-RBDDimmerActor::~RBDDimmerActor()
+XDBPressureTransducer::~XDBPressureTransducer()
 {
-  delete dimmer;
 }
 
-void RBDDimmerActor::begin() 
+void XDBPressureTransducer::begin() 
 {
-  dimmer->begin(NORMAL_MODE, OFF);
+  pinMode(this->pressurePin, INPUT);
 }
 
-void RBDDimmerActor::setPower(int power) 
-{
-  dimmer->setPower(power);
-}
-
-int RBDDimmerActor::getPower() 
-{
-  return dimmer->getPower();
-}
-
-void RBDDimmerActor::setOn(bool isOn) 
-{
-  dimmer->setState(isOn ? ON : OFF);
-}
-
-bool RBDDimmerActor::isOn() 
-{
-  return dimmer->getState() == ON;
+float XDBPressureTransducer::getPressure() {  
+    return analogRead(pressurePin)*aToBar - barStart; // converting to bars
 }

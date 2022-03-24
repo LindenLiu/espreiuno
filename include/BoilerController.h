@@ -37,6 +37,10 @@ public:
   virtual ~BoilerController(){};
   virtual void begin();
   virtual bool changeControlParams(const ControlParameters &params);
-  virtual bool shouldBoilerOn(const double &target, const double &currentTemperature);
+  virtual int boilerPwmValue(double target, double currentTemperature);
+  virtual void startAutoTune();
+  virtual ControlParameters getAutoTuneParams();
+  virtual void stopAutoTune();
+  virtual bool isInTuningMode();
 };
 

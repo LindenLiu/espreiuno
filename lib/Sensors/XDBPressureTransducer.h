@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #pragma once
-#include <ArduinoInterface.h>
 #include <PressureTransducer.h>
 
 class XDBPressureTransducer : public PressureTransducer

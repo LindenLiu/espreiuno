@@ -31,12 +31,20 @@ private:
 public:
   Gui(/* args */);
   virtual ~Gui();
+  virtual void begin();
+  virtual void loop();
   virtual void setBrewSwitchState(SwitchState_t state);
   virtual void setSteamSwitchState(SwitchState_t state);
+  virtual void setTargetTemperature(float temperature);
+  virtual float getTargetTemperature();
+  virtual float getTargetSteamTemperature();
   virtual void setTemperature(float temperature);
   virtual void setPressure(float pressure);
-  virtual void setBoilerState(SwitchState_t state);
+  virtual void setBoilerState(int boilerPwm);
   virtual void setPumpPower(int percentage);
+  virtual void setPidParam(PIDParams_t &params);
+  virtual PIDParams_t getPidParam();
+  virtual void setPidTuneProgress(int progress);
 };
 
 Gui::Gui(/* args */)

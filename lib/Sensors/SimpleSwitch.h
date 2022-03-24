@@ -52,5 +52,5 @@ void SimpleSwitch::begin()
 
 bool SimpleSwitch::isOn() 
 {
-  return analogRead(this->pin) == 0;
+  return digitalRead(this->pin) == HIGH;
 }

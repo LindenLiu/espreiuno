@@ -2,10 +2,10 @@
 
 typedef struct PIDParams
 {
-  double kP = 5;
-  double kI = 3;
-  double kD = 3;
-  uint16_t sampleTime = 200;
+  float kP = 0.2;
+  float kI = 0.1;
+  float kD = 0;
+  uint16_t sampleTime = 100;
 } PIDParams_t;
 
 typedef enum BrewState {
@@ -24,3 +24,21 @@ typedef enum SwitchState {
   SWITCH_OFF = 0,
   SWITCH_ON = 1
 } SwitchState_t;
+
+typedef struct PreinfusionParams 
+{
+  uint8_t prefinfusionSecs = 3;
+  uint8_t waitSecs = 5;
+  uint8_t brewSecs = 30;
+} PreinfusionParams_t;
+
+typedef struct CoffeeMachineConfig
+{
+  float targetBrewTemp = 90;
+  float targetSteamTemp = 142;
+  PreinfusionParams_t preinfusionConfig;
+  PIDParams_t pidParams;
+
+  // Must be last one.
+  uint32_t crc = 0; 
+} CoffeeMachineConfig_t;

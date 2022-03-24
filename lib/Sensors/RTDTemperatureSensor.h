@@ -51,7 +51,7 @@ public:
 };
 
 RTDTemperatureSensor::RTDTemperatureSensor(uint8_t csPin, PTSensorType ptType, float refResistor, max31865_numwires_t wireNum): 
-  ptType(ptType), refResistor(refResistor), wireNum(wireNum), sensor(csPin)
+  sensor(csPin), ptType(ptType), refResistor(refResistor), wireNum(wireNum)
 {
  
 }

@@ -28,16 +28,23 @@
 class SteamBoilerController : public BoilerController<double>
 {
 private:
-  double temperatureRange; // The temperature should be within the [target - range, target + range];
+  double temperatureRange; // If the temperature reached target - range then stop heating.
 public:
   SteamBoilerController(const double &temperatureRange);
   ~SteamBoilerController();
   void begin() override;
   bool changeControlParams(const double &temperatureRange) override;
-  bool shouldBoilerOn(const double &target, const double &currentTemperature) override;
+  int boilerPwmValue(double target, double currentTemperature) override;
+  void startAutoTune() override {};
+  double getAutoTuneParams() override {return temperatureRange;};
+  void stopAutoTune() override {};
+  bool isInTuningMode() override 
+  {
+    return false;
+  }
 };
 
-SteamBoilerController::SteamBoilerController(const double &temperatureRange) 
+SteamBoilerController::SteamBoilerController(const double &temperatureRange)
 {
   changeControlParams(temperatureRange);
 }
@@ -56,11 +63,7 @@ bool SteamBoilerController::changeControlParams(const double &temperatureRange) 
   return true;
 }
 
-bool SteamBoilerController::shouldBoilerOn(const double &target, const double &currentTemperature)
+int SteamBoilerController::boilerPwmValue(double target, double currentTemperature)
 {
-  // If the temperature lower than high and not in the range of low and high ( must be lower than low),
-  // turn the boiler on.
-  // If the temperature is in the range of [low, high], keep boiler off.
-  // The currentTemperature must less than MAX_STEAM_TEMP_IN_C to be safe.
-  return currentTemperature < MAX_STEAM_TEMP_IN_C && currentTemperature < target + temperatureRange && ! currentTemperature < target - temperatureRange;
+  return currentTemperature <= min(MAX_STEAM_TEMP_IN_C, (target - temperatureRange)) ? 255 : 0;
 }

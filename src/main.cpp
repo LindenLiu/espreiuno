@@ -21,16 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include <EEPROM.h>
+#include <Wire.h>
+#include <Arduino.h>
 #include "PlatformConfig.h"
 #include "TemperatureSensor.h"
 #include "SwitchSensor.h"
 #include "../lib/Sensors/SimpleSwitch.h"
 #include "../lib/Sensors/ACS712SwitchSensor.h"
-#include "../lib/Actors/RBDDimmerActor.h"
-#include "../lib/Storage/EEPROMStorage.h"
+#include "../lib/Actors/RBDPumpController.h"
 #include "../lib/CoffeeMachine.h"
 #include "PressureTransducer.h"
 #include "../lib/Sensors/XDBPressureTransducer.h"
+#include "Gui.h"
+#include "../lib/NextionGui.h"
 // #include <avr8-stub.h>
 
 #define PT100
@@ -43,7 +47,7 @@ TemperatureSensor *boilerTemp = new RTDTemperatureSensor(CSPIN, PT_100, 430,  MA
 #endif
 
 #define PRESSURE_TRANSDUCER_PIN A1
-PressureTransducer *boilerPressure = new XDBPressureTransducer(PRESSURE_TRANSDUCER_PIN);
+PressureTransducer *pumpPressure = new XDBPressureTransducer(PRESSURE_TRANSDUCER_PIN);
 
 #define BREW_SWITCH_PIN A3
 SwitchSensor *brewSwitch = new SimpleSwitch(BREW_SWITCH_PIN);
@@ -54,23 +58,40 @@ SwitchSensor *steamSwitch = new SimpleSwitch(STEAM_PIN);
 
 #define PUMP_DIMMER_PIN 1
 #define PUMP_DIMMER_ZC_PIN 0
-Dimmer *pumpControl = new RBDDimmerActor(PUMP_DIMMER_PIN, PUMP_DIMMER_ZC_PIN);
+PumpController *pumpControl = new RBDPumpController(PUMP_DIMMER_PIN, PUMP_DIMMER_ZC_PIN);
+
+
+Gui *gui = new NextionGui();
 
 #define BOILER_SSR_PIN 3
-CoffeeMachine *coffeeMachine = new CoffeeMachine(*pumpControl, *steamSwitch, *brewSwitch, *boilerTemp, BOILER_SSR_PIN);
+CoffeeMachine *coffeeMachine = new CoffeeMachine(*pumpControl, *steamSwitch, *brewSwitch, *boilerTemp, *gui, *pumpPressure, BOILER_SSR_PIN);
 
 
 void setup()
 {
   // debug_init();
-  Serial.begin(9600);
-
   coffeeMachine->begin();
 }
 
 void loop()
 {
-  Serial.print("Pressure: ");
-  Serial.println(boilerPressure->getPressure());
-  coffeeMachine->run();
+  coffeeMachine->loop();
+}
+
+
+// Save button
+void trigger1() {
+  coffeeMachine->onSaveTriggered();
+}
+
+// Auto Tune start
+void trigger2()
+{
+  Serial.println("Start tune pid");
+  coffeeMachine->startTunePid();
+}
+// Cancel auto tune
+void trigger3()
+{
+
 }

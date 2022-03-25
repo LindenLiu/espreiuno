@@ -82,15 +82,3 @@ void loop()
 void trigger1() {
   coffeeMachine->onSaveTriggered();
 }
-
-// Auto Tune start
-void trigger2()
-{
-  Serial.println("Start tune pid");
-  coffeeMachine->startTunePid();
-}
-// Cancel auto tune
-void trigger3()
-{
-
-}

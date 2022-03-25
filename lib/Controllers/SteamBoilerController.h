@@ -35,13 +35,6 @@ public:
   void begin() override;
   bool changeControlParams(const double &temperatureRange) override;
   int boilerPwmValue(double target, double currentTemperature) override;
-  void startAutoTune() override {};
-  double getAutoTuneParams() override {return temperatureRange;};
-  void stopAutoTune() override {};
-  bool isInTuningMode() override 
-  {
-    return false;
-  }
 };
 
 SteamBoilerController::SteamBoilerController(const double &temperatureRange)

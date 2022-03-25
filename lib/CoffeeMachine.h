@@ -96,7 +96,6 @@ public:
   void begin();
   void loop();
   void onSaveTriggered();
-  void startTunePid();
 };
 
 CoffeeMachine::CoffeeMachine(PumpController &pumpControl,
@@ -117,10 +116,6 @@ CoffeeMachine::CoffeeMachine(PumpController &pumpControl,
   
   pidController = new PIDBoilerController(config.pidParams, config.targetBrewTemp, 0);
   steamController = new SteamBoilerController(1);
-  // this->config.pidParams.kP = 2.0;
-  // this->config.pidParams.kD = 0;
-  // this->config.pidParams.sampleTime = 100;
-  // this->config.sampleInterval = 2000;
   
 }
 
@@ -176,24 +171,13 @@ void CoffeeMachine::onSaveTriggered()
   this->saveConfig();
 }
 
-void CoffeeMachine::startTunePid()
-{
-  pidController->startAutoTune();
-}
 
 void CoffeeMachine::updateGui() 
 {
-  if (! pidController->isInTuningMode()) {
   gui.setBoilerState(state.boilerPwm);
   gui.setTemperature(state.currentTemp);
   gui.setPressure(state.pressure);
-  gui.setBrewSwitchState(state.brewSwitchState);
-
-  if (pidController->isInTuningMode()) {
-    PIDParams_t params = pidController->getAutoTuneParams();
-    gui.setPidParam(params);
-  }
-  }
+  gui.setBrewSwitchState(state.brewSwitchState); 
 }
 
 void CoffeeMachine::readTemperature()

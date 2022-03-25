@@ -38,9 +38,5 @@ public:
   virtual void begin();
   virtual bool changeControlParams(const ControlParameters &params);
   virtual int boilerPwmValue(double target, double currentTemperature);
-  virtual void startAutoTune();
-  virtual ControlParameters getAutoTuneParams();
-  virtual void stopAutoTune();
-  virtual bool isInTuningMode();
 };
 

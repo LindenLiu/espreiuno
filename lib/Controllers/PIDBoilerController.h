@@ -26,7 +26,6 @@
 #include <QuickPID.h>
 #include <Wire.h>
 #include "BoilerController.h"
-#include <sTune.h>
 
 class PIDBoilerController : public BoilerController<PIDParams_t>
 {
@@ -36,23 +35,12 @@ private:
   float output;
   uint16_t sampleTimeMs;
   QuickPID *pid;
-  sTune *tuner = NULL;
-  PIDParams_t tunedParams;
-  uint16_t curentSampleCount = 0;
-  bool isTuning = false;
 public:
   PIDBoilerController(const PIDParams_t &params, double targetTemperature, double initTemp);
   ~PIDBoilerController();
   void begin() override;
   bool changeControlParams(const PIDParams_t &params) override;
   int boilerPwmValue(double target, double currentTemperature) override;
-  void startAutoTune() override;
-  PIDParams_t getAutoTuneParams() override;
-  void stopAutoTune() override;
-  bool isInTuningMode() override 
-  {
-    return isTuning;
-  };
 };
 
 PIDBoilerController::PIDBoilerController(const PIDParams_t &params, double targetTemperature, double initTemp) 
@@ -69,7 +57,6 @@ PIDBoilerController::PIDBoilerController(const PIDParams_t &params, double targe
 PIDBoilerController::~PIDBoilerController()
 {
   delete pid;
-  stopAutoTune();
 }
 
 void PIDBoilerController::begin()
@@ -79,32 +66,14 @@ void PIDBoilerController::begin()
 
 int PIDBoilerController::boilerPwmValue(double target, double currentTemperature) 
 {
-  if (abs(currentTemperature - target) <= 0.01 && isTuning) {
+  if (abs(currentTemperature - target) <= 0.01 ) {
     return 0;
   }
-
-  if (isTuning )
-  {
-    
-    switch(tuner->Run())
-    {
-      case tuner->sample:
-        this->curentSampleCount++;
-        this->input = currentTemperature;
-        break;
-      case tuner->tunings:
-        stopAutoTune();
-        break;
-    }
-    
-  } else 
-  {
-    this->setPoint = target;
-    this->input = currentTemperature;
-    this->pid->Compute(); 
-  }
-
   
+  this->setPoint = target;
+  this->input = currentTemperature;
+  this->pid->Compute(); 
+
   return this->output;
 }
 
@@ -119,46 +88,7 @@ bool PIDBoilerController::changeControlParams(const PIDParams_t &newParams) {
   return false;
 }
 
-void PIDBoilerController::startAutoTune() 
-{
-  curentSampleCount = 0;
-  if (tuner == NULL) 
-  {
-    
-    tuner = new sTune(&this->setPoint, &this->output, sTune::TuningMethod::NoOvershoot_PID, sTune::Action::directIP, sTune::SerialMode::printALL);
-    tuner->Configure(150, 255, 0, 50, 100, 1, 100);
-    tuner->SetEmergencyStop(145);
-  } else 
-  {
-    tuner->Reset();
-  }
-  isTuning = true;
-}
 
-void PIDBoilerController::stopAutoTune()
-{
-  isTuning = false;
-  curentSampleCount = 0;
-  if (tuner != NULL) 
-  {
-    tuner->GetAutoTunings(&tunedParams.kP, &tunedParams.kI, &tunedParams.kD);
-    delete tuner;
-  }
-  
-}
 
-PIDParams_t PIDBoilerController::getAutoTuneParams()
-{
-  if (isTuning)
-  {
-    PIDParams_t newParam;
-    tuner->GetAutoTunings(&newParam.kP, &newParam.kI, &newParam.kD);
-    return newParam;
-  } else 
-  {
-    return tunedParams;
-  }
-  
-}
 
 

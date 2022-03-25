@@ -36,7 +36,10 @@ private:
   float output;
   uint16_t sampleTimeMs;
   QuickPID *pid;
-  sTune *tunner = NULL;
+  sTune *tuner = NULL;
+  PIDParams_t tunedParams;
+  uint16_t curentSampleCount = 0;
+  bool isTuning = false;
 public:
   PIDBoilerController(const PIDParams_t &params, double targetTemperature, double initTemp);
   ~PIDBoilerController();
@@ -48,7 +51,7 @@ public:
   void stopAutoTune() override;
   bool isInTuningMode() override 
   {
-    return tunner != NULL;
+    return isTuning;
   };
 };
 
@@ -76,18 +79,32 @@ void PIDBoilerController::begin()
 
 int PIDBoilerController::boilerPwmValue(double target, double currentTemperature) 
 {
-  if (abs(currentTemperature - target) <= 0.01 && tunner == NULL) {
+  if (abs(currentTemperature - target) <= 0.01 && isTuning) {
     return 0;
   }
 
-  // if (tunner != NULL )
-  // {
-  //   tunner->Run();
-  // }
+  if (isTuning )
+  {
+    
+    switch(tuner->Run())
+    {
+      case tuner->sample:
+        this->curentSampleCount++;
+        this->input = currentTemperature;
+        break;
+      case tuner->tunings:
+        stopAutoTune();
+        break;
+    }
+    
+  } else 
+  {
+    this->setPoint = target;
+    this->input = currentTemperature;
+    this->pid->Compute(); 
+  }
 
-  this->setPoint = target;
-  this->input = currentTemperature;
-  this->pid->Compute(); 
+  
   return this->output;
 }
 
@@ -104,35 +121,44 @@ bool PIDBoilerController::changeControlParams(const PIDParams_t &newParams) {
 
 void PIDBoilerController::startAutoTune() 
 {
-  // if (tunner == NULL) 
-  // {
-  //   tunner = new sTune(&this->setPoint, &this->output, sTune::TuningMethod::CohenCoon_PID, sTune::Action::directIP, sTune::SerialMode::printSUMMARY);
-  //   tunner->Configure(150, 255, 0, 0, 1, 0, 10);
-  //   tunner->SetEmergencyStop(145);
-  // } else 
-  // {
-  //   tunner->Reset();
-  // }
+  curentSampleCount = 0;
+  if (tuner == NULL) 
+  {
+    
+    tuner = new sTune(&this->setPoint, &this->output, sTune::TuningMethod::NoOvershoot_PID, sTune::Action::directIP, sTune::SerialMode::printALL);
+    tuner->Configure(150, 255, 0, 50, 100, 1, 100);
+    tuner->SetEmergencyStop(145);
+  } else 
+  {
+    tuner->Reset();
+  }
+  isTuning = true;
 }
 
 void PIDBoilerController::stopAutoTune()
 {
-  if (tunner != NULL) 
+  isTuning = false;
+  curentSampleCount = 0;
+  if (tuner != NULL) 
   {
-    delete tunner;
+    tuner->GetAutoTunings(&tunedParams.kP, &tunedParams.kI, &tunedParams.kD);
+    delete tuner;
   }
   
 }
 
 PIDParams_t PIDBoilerController::getAutoTuneParams()
 {
-  PIDParams_t newParam;
-  if (tunner != NULL)
+  if (isTuning)
   {
-    tunner->GetAutoTunings(&newParam.kP, &newParam.kI, &newParam.kD);
+    PIDParams_t newParam;
+    tuner->GetAutoTunings(&newParam.kP, &newParam.kI, &newParam.kD);
     return newParam;
+  } else 
+  {
+    return tunedParams;
   }
-  return newParam;
+  
 }
 
 

@@ -183,6 +183,7 @@ void CoffeeMachine::startTunePid()
 
 void CoffeeMachine::updateGui() 
 {
+  if (! pidController->isInTuningMode()) {
   gui.setBoilerState(state.boilerPwm);
   gui.setTemperature(state.currentTemp);
   gui.setPressure(state.pressure);
@@ -191,6 +192,7 @@ void CoffeeMachine::updateGui()
   if (pidController->isInTuningMode()) {
     PIDParams_t params = pidController->getAutoTuneParams();
     gui.setPidParam(params);
+  }
   }
 }
 

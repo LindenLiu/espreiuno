@@ -45,19 +45,19 @@
 TemperatureSensor *boilerTemp = new RTDTemperatureSensor(CSPIN, PT_100, 430,  MAX31865_4WIRE);
 #endif
 
-#define PRESSURE_TRANSDUCER_PIN A1
+#define PRESSURE_TRANSDUCER_PIN A5
 PressureTransducer *pumpPressure = new XDBPressureTransducer(PRESSURE_TRANSDUCER_PIN);
 
-#define BREW_SWITCH_PIN A3
+#define BREW_SWITCH_PIN A0
 SwitchSensor *brewSwitch = new SimpleSwitch(BREW_SWITCH_PIN);
 
 
-#define STEAM_PIN A5
+#define STEAM_PIN A2
 SwitchSensor *steamSwitch = new SimpleSwitch(STEAM_PIN);
 
-#define PUMP_DIMMER_PIN 1
-#define PUMP_DIMMER_ZC_PIN 0
-PumpController *pumpControl = new RBDPumpController(PUMP_DIMMER_PIN, PUMP_DIMMER_ZC_PIN);
+#define PUMP_DIMMER_PIN 9
+#define PUMP_DIMMER_ZC_PIN 2
+PumpController *pumpControl = new RBDPumpController(PUMP_DIMMER_PIN, PUMP_DIMMER_ZC_PIN, 127);
 
 
 Gui *gui = new NextionGui();

@@ -36,6 +36,7 @@ public:
   virtual void setBrewSwitchState(SwitchState_t state);
   virtual void setSteamSwitchState(SwitchState_t state);
   virtual void setTargetTemperature(float temperature);
+  virtual void setTargetSteamTemperature(float temperature);
   virtual float getTargetTemperature();
   virtual float getTargetSteamTemperature();
   virtual void setTemperature(float temperature);
@@ -45,6 +46,10 @@ public:
   virtual void setPidParam(PIDParams_t &params);
   virtual PIDParams_t getPidParam();
   virtual void setPidTuneProgress(int progress);
+  virtual GuiPage_t getCurrentPage();
+  virtual uint8_t getManualPressure();
+  virtual void setPreinfusionParams(PreinfusionParams_t &piParams);
+  virtual PreinfusionParams_t getPreinfusionParams();
 };
 
 Gui::Gui(/* args */)

@@ -42,11 +42,13 @@ typedef struct CoffeeMachineState
 {
   int boilerPwm = 0;
   double currentTemp = 0;
+  unsigned int targetTemp = 0;
   uint8_t tempSensorErrorCode = NO_ERROR;
   float pressure = 0;
   SwitchState_t brewSwitchState;
   SwitchState_t steamSwitchState;
   unsigned long lastEvaluation = 0;
+  unsigned long brewingStart = 0;
 } CoffeeMachineState_t;
 
 
@@ -140,7 +142,9 @@ void CoffeeMachine::begin()
   this->pressureSensor.begin();
   updateGui();
   gui.setTargetTemperature(config.targetBrewTemp);
+  gui.setTargetSteamTemperature(config.targetSteamTemp);
   gui.setPidParam(config.pidParams);
+  gui.setPreinfusionParams(config.preinfusionConfig);
 }
 
 void CoffeeMachine::loop()
@@ -150,8 +154,7 @@ void CoffeeMachine::loop()
   if (now - state.lastEvaluation > sampleInterval)
   {
     readTemperature();
-    // state.pressure = pressureSensor.getPressure();
-    state.pressure = 9;
+    // state.pressure = pressureSensor.getPressure(); 
     controlBoiler();
     controlBrew();
     analogWrite(boilerSsrPin, state.boilerPwm);
@@ -167,6 +170,7 @@ void CoffeeMachine::onSaveTriggered()
   config.pidParams = gui.getPidParam();
   config.targetBrewTemp = gui.getTargetTemperature();
   config.targetSteamTemp = gui.getTargetSteamTemperature();
+  config.preinfusionConfig = gui.getPreinfusionParams();
   Serial.println("Save to eeprom");
   this->saveConfig();
 }
@@ -198,10 +202,12 @@ void CoffeeMachine::controlBoiler()
   {
     if (state.steamSwitchState == SWITCH_OFF)
     {
+      state.targetTemp = config.targetBrewTemp;
       boilerOutput = pidController->boilerPwmValue(config.targetBrewTemp, state.currentTemp);
     }
     else
     {
+      state.targetTemp = config.targetSteamTemp;
       boilerOutput = steamController->boilerPwmValue(config.targetSteamTemp, state.currentTemp);
     }
   }
@@ -211,8 +217,41 @@ void CoffeeMachine::controlBoiler()
 void CoffeeMachine::controlBrew()
 {
   
-  if (brewSwitch.isOn() && state.brewSwitchState != SWITCH_ON)
+  if (brewSwitch.isOn() )
   {
+    // Brew manual
+    if (gui.getCurrentPage() == BREWING_MANUAL) 
+    {
+      state.pressure = gui.getManualPressure();
+      pumpControl.setDesiredPressure(state.pressure);
+    } 
+    // Brew auto
+    else 
+    {
+      if (state.brewSwitchState != SWITCH_ON) 
+      {
+        state.brewingStart = millis();
+      }
+
+
+      uint32_t brewSecs = (millis() - state.brewingStart)/1000;
+      if (brewSecs < config.preinfusionConfig.prefinfusionSecs)
+      {
+        // preinfusion
+        pumpControl.setDesiredPressure(config.preinfusionConfig.bar);
+        state.pressure = config.preinfusionConfig.bar;
+      } 
+      else if ( brewSecs < (config.preinfusionConfig.prefinfusionSecs + config.preinfusionConfig.soakSecs))
+      {
+        //soaking
+        pumpControl.setDesiredPressure(0);
+        state.pressure = 0;
+      } else 
+      {
+        pumpControl.setDesiredPressure(15);
+        state.pressure = 9;
+      }
+    }
     // If brewcontroller is null create
     // continue brewing process (preInfusing, auto pressure profiling etc)
     state.brewSwitchState = SWITCH_ON;
@@ -221,6 +260,7 @@ void CoffeeMachine::controlBrew()
   {
     // delete last brew controller;
     state.brewSwitchState = SWITCH_OFF;
+    state.brewingStart = 0;
   }
 }
 

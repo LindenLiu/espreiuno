@@ -22,63 +22,78 @@
  * SOFTWARE.
  */
 #pragma once
-
-#include <RBDdimmer.h>
+#include <stdlib.h>
 #include "PumpController.h"
+#include <RBDdimmer.h>
 
 class RBDPumpController : public PumpController
 {
 private:
-  const uint8_t oneBarStartingPower = 51;
-  const float oneBarStepPower = 2.5;
-  dimmerLamp *dimmer;
+  static uint8_t range;
+  static uint8_t zcPin;
+  static uint8_t outputPin;
+  static bool isPumpOn;
+  static unsigned int value;
+  static unsigned int counter;
+  static void onZeroCross();
+  dimmerLamp* dimmer;
 public:
-  RBDPumpController(uint8_t pin, uint8_t zc_pin);
+  RBDPumpController(uint8_t pin, uint8_t zc_pin, uint8_t range);
   ~RBDPumpController();
   void begin() override;
   void setDesiredPressure(float bar) override;
-  float getDesiredPressure() override;
   void setOn(bool isOn) override;
   bool isOn() override; 
 };
 
-RBDPumpController::RBDPumpController(uint8_t pin, uint8_t zc_pin)
+uint8_t RBDPumpController::range = 127;
+uint8_t RBDPumpController::zcPin = 255;
+uint8_t RBDPumpController::outputPin = 255;
+unsigned int RBDPumpController::value = 0;
+unsigned int RBDPumpController::counter = 0;
+bool RBDPumpController::isPumpOn = false;
+
+
+RBDPumpController::RBDPumpController(uint8_t pin, uint8_t theZcPin, uint8_t theRange)
 {
-  #if   defined(ARDUINO_ARCH_AVR)
-	  dimmer = new dimmerLamp(pin);
-  #elif defined(ARDUINO_ARCH_ESP32)
-    dimmer = new dimmerLamp(pin, zc_pin);
-  #endif
+  dimmer = new dimmerLamp(pin);
 }
 
 RBDPumpController::~RBDPumpController()
 {
-  delete dimmer;
+  
 }
 
 void RBDPumpController::begin() 
 {
+  // pinMode(outputPin, OUTPUT);
+  // pinMode(zcPin, INPUT_PULLUP);
+  // attachInterrupt(digitalPinToInterrupt(zcPin), onZeroCross, FALLING);
+  // RBDPumpController::value = RBDPumpController::range;
+  // RBDPumpController::counter = 0;
   dimmer->begin(NORMAL_MODE, ON);
-  dimmer->setPower(100);
 }
 
 void RBDPumpController::setDesiredPressure(float bar) 
 {
-  int power = round((bar-1) * this->oneBarStepPower + this->oneBarStartingPower);
-  dimmer->setPower(power);
+  dimmer->setPower((bar / 15) * 100);
 }
 
-float RBDPumpController::getDesiredPressure() 
-{
-  return (dimmer->getPower() - this->oneBarStartingPower)/this->oneBarStepPower + 1;
-}
 
 void RBDPumpController::setOn(bool isOn) 
 {
-  dimmer->setState(isOn ? ON : OFF);
+  RBDPumpController::isPumpOn = isOn;
 }
 
 bool RBDPumpController::isOn() 
 {
   return dimmer->getState() == ON;
+}
+
+void RBDPumpController::onZeroCross()
+{
+  // RBDPumpController::counter += RBDPumpController::value;
+  // unsigned int a = RBDPumpController::counter / RBDPumpController::range;
+  // RBDPumpController::counter = RBDPumpController::counter % RBDPumpController::range;
+  // digitalWrite(RBDPumpController::outputPin, RBDPumpController::isPumpOn && a > 0);
 }

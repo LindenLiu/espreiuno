@@ -31,7 +31,6 @@ public:
   virtual ~PumpController(){};
   virtual void begin();
   virtual void setDesiredPressure(float bar);
-  virtual float getDesiredPressure();
   virtual void setOn(bool isOn);
   virtual bool isOn(); 
 };

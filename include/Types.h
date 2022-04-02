@@ -27,9 +27,10 @@ typedef enum SwitchState {
 
 typedef struct PreinfusionParams 
 {
-  uint8_t prefinfusionSecs = 3;
-  uint8_t waitSecs = 5;
-  uint8_t brewSecs = 30;
+  uint8_t prefinfusionSecs = 5;
+  uint8_t soakSecs = 5;
+  uint8_t bar=2;
+  SwitchState_t state=SWITCH_OFF;
 } PreinfusionParams_t;
 
 typedef struct CoffeeMachineConfig
@@ -42,3 +43,16 @@ typedef struct CoffeeMachineConfig
   // Must be last one.
   uint32_t crc = 0; 
 } CoffeeMachineConfig_t;
+
+typedef enum GuiPage {
+  HOME=0,
+  BREWING_AUTO=1,
+  BREWING_MANUAL=2,
+  SETTINGS_BREW=3,
+  CLEAN_FLUSH=4,
+  CLEAN_DESCALE=5,
+  SETTINGS_TEMP=6,
+  SETTINGS_POWER=7,
+  POP_MSG=8,
+  SETTINGS_PID=15
+} GuiPage_t;

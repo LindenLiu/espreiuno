@@ -8,17 +8,17 @@ The Arduino based PID and control center for Espresso machine.
 # Features
 Here is the list of the features plan to implemented:
 - **Temperature control**
-- [ ] PID Control for Brewing
-- [ ] PID Parameters Auto tuning
+- [x] PID Control for Brewing
+- ~~ [ ] PID Parameters Auto tuning ~~ The library is too large. Eat about half size of the code space. And it's almost one time thing.
 - [x] RTD Temperature sensor
-- [ ] Steam Temperature control
+- [x] Steam Temperature control
 - **Brewing**
 - [x] Brew Switch detection
 - [ ] Pressure Sensor integration
-- [ ] Auto Preinfusion
-- [ ] Manual Preinfusion
+- [x] Auto Preinfusion
+- [x] Manual Preinfusion
 - [ ] Auto Pressure profile for brewing.
-- [ ] Manual Pressure control for brewing.
+- [x] Manual Pressure control for brewing.
 - **Cleaning**
 - [ ] Back flush (5 times caffeza, wait user confirm portafilter cleaned and 6 times clean water)
 - [ ] Descale

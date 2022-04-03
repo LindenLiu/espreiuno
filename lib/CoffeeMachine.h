@@ -37,6 +37,7 @@
 #include "PressureTransducer.h"
 
 #define NO_ERROR 0
+#define SAMPLE_INTERVAL 100
 
 typedef struct CoffeeMachineState
 {
@@ -68,7 +69,6 @@ private:
   // TODO: Make sure read and write automic
   volatile CoffeeMachineState_t state;
   CoffeeMachineConfig_t config;
-  volatile uint16_t sampleInterval = 100;
   // Read temperature from sensor, if there is error, put it to tempSensorErrorCode
   void readTemperature();
   // Update gui
@@ -86,6 +86,7 @@ private:
 
   void readConfig();
   void saveConfig();
+  void applyConfigChange();
 public:
   CoffeeMachine(PumpController &pumpControl,
                 SwitchSensor &steamSwitch,
@@ -117,7 +118,7 @@ CoffeeMachine::CoffeeMachine(PumpController &pumpControl,
 {
   
   pidController = new PIDBoilerController(config.pidParams, config.targetBrewTemp, 0);
-  steamController = new SteamBoilerController(1);
+  steamController = new SteamBoilerController(2.5);
   
 }
 
@@ -131,6 +132,7 @@ void CoffeeMachine::begin()
 {
   Serial.begin(115200);
   this->readConfig();
+  applyConfigChange();
   pinMode(boilerSsrPin, OUTPUT);
   this->gui.begin();
   this->pumpControl.begin();
@@ -151,13 +153,13 @@ void CoffeeMachine::loop()
 {
   double now = millis();
   gui.loop();
-  if (now - state.lastEvaluation > sampleInterval)
+  if (now - state.lastEvaluation > SAMPLE_INTERVAL)
   {
     readTemperature();
     // state.pressure = pressureSensor.getPressure(); 
     controlBoiler();
     controlBrew();
-    analogWrite(boilerSsrPin, state.boilerPwm);
+    digitalWrite(boilerSsrPin, state.boilerPwm == 255 ? HIGH: LOW);
     updateGui();
     state.lastEvaluation = now;
   }
@@ -168,13 +170,18 @@ void CoffeeMachine::onSaveTriggered()
 {
 
   config.pidParams = gui.getPidParam();
+  config.pidParams.sampleTime = SAMPLE_INTERVAL;
   config.targetBrewTemp = gui.getTargetTemperature();
   config.targetSteamTemp = gui.getTargetSteamTemperature();
   config.preinfusionConfig = gui.getPreinfusionParams();
-  Serial.println("Save to eeprom");
   this->saveConfig();
+  
 }
 
+void CoffeeMachine::applyConfigChange()
+{
+  this->pidController->changeControlParams(config.pidParams);
+}
 
 void CoffeeMachine::updateGui() 
 {
@@ -248,7 +255,7 @@ void CoffeeMachine::controlBrew()
         state.pressure = 0;
       } else 
       {
-        pumpControl.setDesiredPressure(15);
+        pumpControl.setDesiredPressure(9);
         state.pressure = 9;
       }
     }
@@ -270,7 +277,6 @@ void CoffeeMachine::readConfig()
   EEPROM.get(0, theConfig);
   uint32_t crc = calculateSum(theConfig);
   if (crc == theConfig.crc) {
-    Serial.println("Use EEPROM config");
     this->config = theConfig;
   }
 }

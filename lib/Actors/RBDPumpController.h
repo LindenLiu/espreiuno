@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 #pragma once
+#define ALL_DIMMERS 1
 #include <stdlib.h>
 #include "PumpController.h"
 #include <RBDdimmer.h>
+
 
 class RBDPumpController : public PumpController
 {
@@ -61,7 +63,7 @@ RBDPumpController::RBDPumpController(uint8_t pin, uint8_t theZcPin, uint8_t theR
 
 RBDPumpController::~RBDPumpController()
 {
-  
+  delete dimmer;
 }
 
 void RBDPumpController::begin() 
@@ -76,7 +78,8 @@ void RBDPumpController::begin()
 
 void RBDPumpController::setDesiredPressure(float bar) 
 {
-  dimmer->setPower((bar / 15) * 100);
+   dimmer->setPower((bar -1)*2.75+51);
+  // RBDPumpController::value = (bar/9)*RBDPumpController::range;
 }
 
 

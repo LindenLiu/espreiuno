@@ -51,8 +51,7 @@ PressureTransducer *pumpPressure = new XDBPressureTransducer(PRESSURE_TRANSDUCER
 #define BREW_SWITCH_PIN A0
 SwitchSensor *brewSwitch = new SimpleSwitch(BREW_SWITCH_PIN);
 
-
-#define STEAM_PIN A2
+#define STEAM_PIN A1
 SwitchSensor *steamSwitch = new SimpleSwitch(STEAM_PIN);
 
 #define PUMP_DIMMER_PIN 9

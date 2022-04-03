@@ -2,9 +2,9 @@
 
 typedef struct PIDParams
 {
-  float kP = 0.2;
-  float kI = 0.1;
-  float kD = 0;
+  float kP = 1.5;
+  float kI = 0;
+  float kD = 1.3;
   uint16_t sampleTime = 100;
 } PIDParams_t;
 
@@ -29,14 +29,14 @@ typedef struct PreinfusionParams
 {
   uint8_t prefinfusionSecs = 5;
   uint8_t soakSecs = 5;
-  uint8_t bar=2;
+  uint8_t bar=3;
   SwitchState_t state=SWITCH_OFF;
 } PreinfusionParams_t;
 
 typedef struct CoffeeMachineConfig
 {
-  float targetBrewTemp = 90;
-  float targetSteamTemp = 142;
+  float targetBrewTemp = 97;
+  float targetSteamTemp = 137;
   PreinfusionParams_t preinfusionConfig;
   PIDParams_t pidParams;
 

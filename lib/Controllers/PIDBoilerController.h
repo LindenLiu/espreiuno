@@ -51,7 +51,7 @@ PIDBoilerController::PIDBoilerController(const PIDParams_t &params, double targe
   this->pid = new QuickPID(&input, &output, &this->setPoint, params.kP, params.kI, params.kD, QuickPID::Action::direct);
   this->pid->SetMode(QuickPID::Control::automatic);
   this->pid->SetSampleTimeUs(params.sampleTime*1000);
-  this->pid->SetOutputLimits(0, 255);
+  this->pid->SetOutputLimits(0, 1);
 }
 
 PIDBoilerController::~PIDBoilerController()
@@ -74,7 +74,7 @@ int PIDBoilerController::boilerPwmValue(double target, double currentTemperature
   this->input = currentTemperature;
   this->pid->Compute(); 
 
-  return this->output;
+  return this->output * 255;
 }
 
 bool PIDBoilerController::changeControlParams(const PIDParams_t &newParams) {

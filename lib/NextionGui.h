@@ -157,6 +157,7 @@ PreinfusionParams_t NextionGui::getPreinfusionParams() {
   params.state = nex.readNumber("piState") == 0 ? SWITCH_OFF : SWITCH_ON;
   params.prefinfusionSecs = nex.readNumber("piSec");
   params.soakSecs = nex.readNumber("piSoak");
+  params.brewingBar = nex.readNumber("brewingBar") / 10.0;
   return params;
 }
 
@@ -170,4 +171,6 @@ void NextionGui::setPreinfusionParams(PreinfusionParams_t &params)
   nex.writeNum("brewAuto.n1.val", params.bar);
   nex.writeNum("piSoak", params.soakSecs);
   nex.writeNum("brewAuto.n4.val", params.soakSecs);
+  nex.writeNum("brewAuto.xBrewingBar.val", params.brewingBar*10);
+  nex.writeNum("brewingBar", params.brewingBar*10);
 }

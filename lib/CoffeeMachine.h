@@ -255,8 +255,8 @@ void CoffeeMachine::controlBrew()
         state.pressure = 0;
       } else 
       {
-        pumpControl.setDesiredPressure(9);
-        state.pressure = 9;
+        pumpControl.setDesiredPressure(config.preinfusionConfig.brewingBar);
+        state.pressure = config.preinfusionConfig.brewingBar;
       }
     }
     // If brewcontroller is null create

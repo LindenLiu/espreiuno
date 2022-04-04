@@ -29,7 +29,8 @@ typedef struct PreinfusionParams
 {
   uint8_t prefinfusionSecs = 5;
   uint8_t soakSecs = 5;
-  uint8_t bar=3;
+  uint8_t bar=2;
+  float brewingBar = 6.5;
   SwitchState_t state=SWITCH_OFF;
 } PreinfusionParams_t;
 
